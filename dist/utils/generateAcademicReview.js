@@ -13,6 +13,7 @@ exports.generateAcademicReviewObject = exports.generateAcademicReviewText = void
 const ai_1 = require("ai");
 const google_1 = require("@ai-sdk/google");
 const zod_1 = require("zod");
+const index_1 = require("./index");
 /**
  * 学術論文レビュー用のスキーマとアイコンマップ
  */
@@ -72,35 +73,6 @@ const academicPriorityOrder = {
     "GOOD_POINT": 999
 };
 /**
- * Generic retry function with exponential backoff
- */
-function withRetry(operation, options) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { maxAttempts, initialDelayMs, backoffFactor, retryableError, onRetry } = options;
-        let lastError;
-        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-            try {
-                return yield operation(attempt);
-            }
-            catch (error) {
-                lastError = error;
-                if (!retryableError(error)) {
-                    throw error;
-                }
-                if (attempt >= maxAttempts) {
-                    break;
-                }
-                const delayMs = initialDelayMs * Math.pow(backoffFactor, attempt - 1);
-                if (onRetry) {
-                    onRetry(attempt, error);
-                }
-                yield new Promise(resolve => setTimeout(resolve, delayMs));
-            }
-        }
-        throw lastError;
-    });
-}
-/**
  * 学術論文レビュー用のテキスト生成関数
  */
 const generateAcademicReviewText = (params) => __awaiter(void 0, void 0, void 0, function* () {
@@ -121,7 +93,7 @@ const generateAcademicReviewObject = (params) => __awaiter(void 0, void 0, void 
     const isJapanese = userPrompt.includes('Japanese');
     const categoryMap = isJapanese ? categoryMapJa : categoryMapEn;
     try {
-        const { object } = yield withRetry((...args_1) => __awaiter(void 0, [...args_1], void 0, function* (attempt = 1) {
+        const { object } = yield (0, index_1.withRetry)((...args_1) => __awaiter(void 0, [...args_1], void 0, function* (attempt = 1) {
             return yield (0, ai_1.generateObject)({
                 schema: academicReviewSchema,
                 model: (0, google_1.google)(modelCode),

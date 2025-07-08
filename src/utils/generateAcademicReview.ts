@@ -1,7 +1,7 @@
 import { generateText, generateObject, NoObjectGeneratedError } from "ai";
 import { google } from "@ai-sdk/google";
 import { z } from "zod";
-import { GenerateReviewCommentFn, GenerateReviewCommentFnParams, ReviewCommentContent } from "./index";
+import { GenerateReviewCommentFn, GenerateReviewCommentFnParams, ReviewCommentContent, withRetry } from "./index";
 
 /**
  * 学術論文レビュー用のスキーマとアイコンマップ
@@ -79,49 +79,6 @@ const academicPriorityOrder = {
     "GOOD_POINT": 999
 } as const;
 
-/**
- * Generic retry function with exponential backoff
- */
-async function withRetry<T>(
-    operation: (attempt?: number) => Promise<T>,
-    options: {
-        maxAttempts: number;
-        initialDelayMs: number;
-        backoffFactor: number;
-        retryableError: (error: any) => boolean;
-        onRetry?: (attempt: number, error: any) => void;
-    }
-): Promise<T> {
-    const { maxAttempts, initialDelayMs, backoffFactor, retryableError, onRetry } = options;
-
-    let lastError: any;
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-            return await operation(attempt);
-        } catch (error) {
-            lastError = error;
-
-            if (!retryableError(error)) {
-                throw error;
-            }
-
-            if (attempt >= maxAttempts) {
-                break;
-            }
-
-            const delayMs = initialDelayMs * Math.pow(backoffFactor, attempt - 1);
-
-            if (onRetry) {
-                onRetry(attempt, error);
-            }
-
-            await new Promise(resolve => setTimeout(resolve, delayMs));
-        }
-    }
-
-    throw lastError;
-}
 
 /**
  * 学術論文レビュー用のテキスト生成関数

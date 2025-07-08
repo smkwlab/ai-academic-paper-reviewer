@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateReviewCommentObject = exports.generateReviewCommentText = exports.dryRunPostReviewComment = exports.realPostReviewComment = exports.generateAcademicReviewText = exports.generateAcademicReviewObject = exports.createAcademicReviewPrompt = void 0;
+exports.withRetry = withRetry;
 exports.fetchPullRequest = fetchPullRequest;
 exports.fetchPullRequestFiles = fetchPullRequestFiles;
 exports.filterFiles = filterFiles;
@@ -132,7 +133,7 @@ function parseFiles(files) {
 /**
  * AI に投げるプロンプトを生成する
  */
-function createReviewPrompt({ prTitle, prBody, diffText, language, }) {
+function createReviewPrompt({ prTitle, prBody, diffText, language, repoName, }) {
     return `
 You are an experienced professor in the School of Science and Engineering.
 Please review the code changes in the following Pull Request and point out potential problems or areas for improvement only if they are significant.
@@ -352,6 +353,7 @@ function runReviewBotVercelAI(_a) {
                 prBody: prData.body,
                 diffText,
                 language,
+                repoName: `${owner}/${repo}`,
             });
             console.log("--- Prompt ---");
             console.log(userPrompt);
