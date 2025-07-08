@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateReviewCommentObject = exports.generateReviewCommentText = exports.dryRunPostReviewComment = exports.realPostReviewComment = exports.generateAcademicReviewText = exports.generateAcademicReviewObject = exports.createAcademicReviewPrompt = void 0;
+exports.withRetry = withRetry;
 exports.fetchPullRequest = fetchPullRequest;
 exports.fetchPullRequestFiles = fetchPullRequestFiles;
 exports.filterFiles = filterFiles;
@@ -29,35 +30,6 @@ Object.defineProperty(exports, "createAcademicReviewPrompt", { enumerable: true,
 var generateAcademicReview_1 = require("./generateAcademicReview");
 Object.defineProperty(exports, "generateAcademicReviewObject", { enumerable: true, get: function () { return generateAcademicReview_1.generateAcademicReviewObject; } });
 Object.defineProperty(exports, "generateAcademicReviewText", { enumerable: true, get: function () { return generateAcademicReview_1.generateAcademicReviewText; } });
-/**
- * Generic retry function with exponential backoff
- */
-function withRetry(operation, options) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { maxAttempts, initialDelayMs, backoffFactor, retryableError, onRetry } = options;
-        let lastError;
-        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-            try {
-                return yield operation(attempt);
-            }
-            catch (error) {
-                lastError = error;
-                if (!retryableError(error)) {
-                    throw error; // Not retryable, rethrow immediately
-                }
-                if (attempt >= maxAttempts) {
-                    break; // Will throw the last error after the loop
-                }
-                const delayMs = initialDelayMs * Math.pow(backoffFactor, attempt - 1);
-                if (onRetry) {
-                    onRetry(attempt, error);
-                }
-                yield new Promise(resolve => setTimeout(resolve, delayMs));
-            }
-        }
-        throw lastError;
-    });
-}
 /**
  * Generic retry function with exponential backoff
  */
@@ -132,7 +104,7 @@ function parseFiles(files) {
 /**
  * AI に投げるプロンプトを生成する
  */
-function createReviewPrompt({ prTitle, prBody, diffText, language, }) {
+function createReviewPrompt({ prTitle, prBody, diffText, language, repoName, }) {
     return `
 You are an experienced professor in the School of Science and Engineering.
 Please review the code changes in the following Pull Request and point out potential problems or areas for improvement only if they are significant.
@@ -352,6 +324,7 @@ function runReviewBotVercelAI(_a) {
                 prBody: prData.body,
                 diffText,
                 language,
+                repoName: `${owner}/${repo}`,
             });
             console.log("--- Prompt ---");
             console.log(userPrompt);

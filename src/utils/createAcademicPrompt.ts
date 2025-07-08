@@ -1,4 +1,9 @@
 /**
+ * 学部論文リポジトリのパターン
+ */
+const UNDERGRADUATE_THESIS_PATTERN = /^smkwlab\/.*-sotsuron$/;
+
+/**
  * 学術論文レビュー用のプロンプトを生成する
  */
 export function createAcademicReviewPrompt({
@@ -41,7 +46,7 @@ Review perspectives:
    
 4. Research novelty and contribution
    - Clear differentiation from existing research
-   - Explanation of research significance and contributions${repoName?.match(/smkwlab\/.*-sotsuron$/) ? `
+   - Explanation of research significance and contributions${repoName?.match(UNDERGRADUATE_THESIS_PATTERN) ? `
    - Note: For undergraduate thesis work, moderate novelty expectations are appropriate` : ''}
    
 5. Formal requirements
@@ -58,7 +63,7 @@ Feedback priority levels:
 Important instructions:
 - Provide educational and constructive feedback
 - Offer specific improvement suggestions
-- Minimize mere grammar or notation corrections${repoName?.match(/smkwlab\/.*-sotsuron$/) ? `
+- Minimize mere grammar or notation corrections${repoName?.match(UNDERGRADUATE_THESIS_PATTERN) ? `
 - For undergraduate thesis: Focus on fundamental research skills rather than groundbreaking novelty
 - Emphasize learning outcomes and research process understanding` : ''}
 - Write feedback in ${language}

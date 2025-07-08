@@ -15,7 +15,7 @@ export { generateAcademicReviewObject, generateAcademicReviewText } from './gene
 /**
  * Generic retry function with exponential backoff
  */
-async function withRetry<T>(
+export async function withRetry<T>(
     operation: (attempt?: number) => Promise<T>,
     options: {
         maxAttempts: number;
