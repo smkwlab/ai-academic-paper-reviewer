@@ -15,7 +15,7 @@ export { generateAcademicReviewObject, generateAcademicReviewText } from './gene
 /**
  * Generic retry function with exponential backoff
  */
-async function withRetry<T>(
+export async function withRetry<T>(
     operation: (attempt?: number) => Promise<T>,
     options: {
         maxAttempts: number;
@@ -90,7 +90,13 @@ interface ReviewBotOptions {
     modelCode: string;
     generateReviewCommentFn: GenerateReviewCommentFn
     postReviewCommentFn: PostReviewCommentFn;
-    createPromptFn?: typeof createReviewPrompt;
+    createPromptFn?: (params: {
+        prTitle: string;
+        prBody: string | null;
+        diffText: string;
+        language: string;
+        repoName?: string;
+    }) => string;
 }
 
 export type GenerateReviewCommentFn = (params: GenerateReviewCommentFnParams) => Promise<ReviewCommentContent>
@@ -164,11 +170,13 @@ export function createReviewPrompt({
     prBody,
     diffText,
     language,
+    repoName,
 }: {
     prTitle: string;
     prBody: string | null;
     diffText: string;
     language: string;
+    repoName?: string;
 }): string {
     return `
 You are an experienced professor in the School of Science and Engineering.
@@ -181,7 +189,7 @@ Important rules about the diff format:
 Review guidelines:
 - Ignore changes that only involve whitespace, indentation, or formatting that do not affect the code's behavior.
 - Do not add any review comments for trivial or non-impactful changes (e.g., variable-name changes that do not affect logic).
-- For suggestions, assign a priority. Only the following labels are allowed: PRIORITY:HIGH, PRIORITY:MEDIUM, PRIORITY:LOW, or POSITIVE.
+- For suggestions, assign a priority. Only the following labels are allowed: HIGH, MEDIUM, LOW, or POSITIVE.
 - Use type=POSITIVE only for changes that bring a clear, significant improvement to readability, performance, or maintainability. If a change is merely “not a problem,” do not comment on it.
 - Your review must be written in ${language}.
 
@@ -449,6 +457,7 @@ export async function runReviewBotVercelAI({
             prBody: prData.body,
             diffText,
             language,
+            repoName: `${owner}/${repo}`,
         });
 
         console.log("--- Prompt ---");

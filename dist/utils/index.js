@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateReviewCommentObject = exports.generateReviewCommentText = exports.dryRunPostReviewComment = exports.realPostReviewComment = exports.generateAcademicReviewText = exports.generateAcademicReviewObject = exports.createAcademicReviewPrompt = void 0;
+exports.withRetry = withRetry;
 exports.fetchPullRequest = fetchPullRequest;
 exports.fetchPullRequestFiles = fetchPullRequestFiles;
 exports.filterFiles = filterFiles;
@@ -103,7 +104,7 @@ function parseFiles(files) {
 /**
  * AI に投げるプロンプトを生成する
  */
-function createReviewPrompt({ prTitle, prBody, diffText, language, }) {
+function createReviewPrompt({ prTitle, prBody, diffText, language, repoName, }) {
     return `
 You are an experienced professor in the School of Science and Engineering.
 Please review the code changes in the following Pull Request and point out potential problems or areas for improvement only if they are significant.
@@ -115,7 +116,7 @@ Important rules about the diff format:
 Review guidelines:
 - Ignore changes that only involve whitespace, indentation, or formatting that do not affect the code's behavior.
 - Do not add any review comments for trivial or non-impactful changes (e.g., variable-name changes that do not affect logic).
-- For suggestions, assign a priority. Only the following labels are allowed: PRIORITY:HIGH, PRIORITY:MEDIUM, PRIORITY:LOW, or POSITIVE.
+- For suggestions, assign a priority. Only the following labels are allowed: HIGH, MEDIUM, LOW, or POSITIVE.
 - Use type=POSITIVE only for changes that bring a clear, significant improvement to readability, performance, or maintainability. If a change is merely “not a problem,” do not comment on it.
 - Your review must be written in ${language}.
 
@@ -323,6 +324,7 @@ function runReviewBotVercelAI(_a) {
                 prBody: prData.body,
                 diffText,
                 language,
+                repoName: `${owner}/${repo}`,
             });
             console.log("--- Prompt ---");
             console.log(userPrompt);

@@ -2,9 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createAcademicReviewPrompt = createAcademicReviewPrompt;
 /**
+ * 学部論文リポジトリのパターン
+ */
+const UNDERGRADUATE_THESIS_PATTERN = /^smkwlab\/.*-sotsuron$/;
+/**
  * 学術論文レビュー用のプロンプトを生成する
  */
-function createAcademicReviewPrompt({ prTitle, prBody, diffText, language, }) {
+function createAcademicReviewPrompt({ prTitle, prBody, diffText, language, repoName, }) {
     return `
 You are an experienced faculty member in the School of Science and Engineering.
 Please review the student's academic paper from an educational perspective and provide constructive feedback to improve the quality of the paper.
@@ -32,7 +36,8 @@ Review perspectives:
    
 4. Research novelty and contribution
    - Clear differentiation from existing research
-   - Explanation of research significance and contributions
+   - Explanation of research significance and contributions${(repoName === null || repoName === void 0 ? void 0 : repoName.match(UNDERGRADUATE_THESIS_PATTERN)) ? `
+   - Note: For undergraduate thesis work, moderate novelty expectations are appropriate` : ''}
    
 5. Formal requirements
    - Citation format consistency
@@ -48,7 +53,9 @@ Feedback priority levels:
 Important instructions:
 - Provide educational and constructive feedback
 - Offer specific improvement suggestions
-- Minimize mere grammar or notation corrections
+- Minimize mere grammar or notation corrections${(repoName === null || repoName === void 0 ? void 0 : repoName.match(UNDERGRADUATE_THESIS_PATTERN)) ? `
+- For undergraduate thesis: Focus on fundamental research skills rather than groundbreaking novelty
+- Emphasize learning outcomes and research process understanding` : ''}
 - Write feedback in ${language}
 
 Paper Title: ${prTitle}
