@@ -60,6 +60,35 @@ function withRetry(operation, options) {
     });
 }
 /**
+ * Generic retry function with exponential backoff
+ */
+function withRetry(operation, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { maxAttempts, initialDelayMs, backoffFactor, retryableError, onRetry } = options;
+        let lastError;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                return yield operation(attempt);
+            }
+            catch (error) {
+                lastError = error;
+                if (!retryableError(error)) {
+                    throw error; // Not retryable, rethrow immediately
+                }
+                if (attempt >= maxAttempts) {
+                    break; // Will throw the last error after the loop
+                }
+                const delayMs = initialDelayMs * Math.pow(backoffFactor, attempt - 1);
+                if (onRetry) {
+                    onRetry(attempt, error);
+                }
+                yield new Promise(resolve => setTimeout(resolve, delayMs));
+            }
+        }
+        throw lastError;
+    });
+}
+/**
  * GitHub の PR 情報を取得
  */
 function fetchPullRequest(octokit, owner, repo, pullNumber) {
