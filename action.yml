@@ -8,7 +8,7 @@ branding:
 inputs:
   GEMINI_API_KEY:
     description: "Gemini API Key"
-    required: true
+    required: false
     default: ""
   GITHUB_TOKEN:
     description: "GitHub Token"
