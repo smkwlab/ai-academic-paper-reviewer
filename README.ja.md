@@ -37,7 +37,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           LANGUAGE: "Japanese"
           EXCLUDE_PATHS: "*.bib,*.sty,*.cls,*.bbl,*.aux"
-          MODEL_CODE: "models/gemini-2.0-flash"
+          MODEL_CODE: "models/gemini-2.5-flash-lite"
           REVIEW_MODE: "ACADEMIC"
 ```
 
@@ -62,7 +62,7 @@ jobs:
 |--------------------------|------------|----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **EXCLUDE_PATHS**        | false       | -                                | レビューから除外したいファイルパスやディレクトリをカンマ区切りで指定します。例: `*.bib,*.sty,*.cls`<br>ここで指定されたパスに該当するファイルはレビューの対象外となります。                                    |
 | **LANGUAGE**             | false       | `English`                        | AIが生成するフィードバックの言語を指定します（例: `Japanese`, `English`）。                                                                                                          |
-| **MODEL_CODE**           | false       | `models/gemini-2.0-flash`    | 使用するGeminiモデルの指定です。AI Studioで利用できるモデルコードを設定してください。                                                                                             |
+| **MODEL_CODE**           | false       | `models/gemini-2.5-flash`    | 使用するGeminiモデルの指定です。AI Studioで利用できるモデルコードを設定してください。                                                                                             |
 | **REVIEW_MODE**          | false       | `CODE`                           | レビューモード: 学術論文の場合は`ACADEMIC`、コードレビューの場合は`CODE`を指定。                                                                                              |
 | **USE_SINGLE_COMMENT_REVIEW** | false | `false`                          | `true`に設定すると、1つのコメントにまとめてレビュー結果を投稿します。<br>`false`の場合は該当箇所に直接コメントを付けます。                                                              |
 
