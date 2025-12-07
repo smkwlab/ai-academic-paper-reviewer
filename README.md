@@ -37,7 +37,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           LANGUAGE: "Japanese"
           EXCLUDE_PATHS: "*.bib,*.sty,*.cls,*.bbl,*.aux"
-          MODEL_CODE: "models/gemini-2.0-flash"
+          MODEL_CODE: "models/gemini-2.5-flash-lite"
           REVIEW_MODE: "ACADEMIC"
 ```
 Then, set your Google AI Studio Gemini API Key as GEMINI_API_KEY in your repository's GitHub Secrets.
@@ -61,7 +61,7 @@ You can fine-tune how reviews are performed by setting the following environment
 |--------------------------|------------|----------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **EXCLUDE_PATHS**        | false       | -                                | 	Specify file paths or directories to exclude from reviews, separated by commas. Example: `*.bib,*.sty,*.cls`<br>Files matching these paths will not be reviewed.                                    |
 | **LANGUAGE**             | false       | `English`                        | Specifies the language of the AI-generated feedback (Example: `Japanese`, `English`).                                                                                                          |
-| **MODEL_CODE**           | false       | `models/gemini-2.0-flash`    | The Gemini model to use. Please set a valid model code that is available in AI Studio.                                                                                             |
+| **MODEL_CODE**           | false       | `models/gemini-2.5-flash`    | The Gemini model to use. Please set a valid model code that is available in AI Studio.                                                                                             |
 | **REVIEW_MODE**          | false       | `CODE`                           | Review mode: `ACADEMIC` for academic papers, `CODE` for code reviews.                                                                                              |
 | **USE_SINGLE_COMMENT_REVIEW** | false | `false`                          | When set to true, posts all review results in a single comment with overall feedback. When false, posts line-specific comments.                                                              |
 
