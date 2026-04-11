@@ -6,6 +6,7 @@
   "timezone": "Asia/Tokyo",
   "schedule": ["after 9pm on sunday"],
   "semanticCommits": "enabled",
+  "forkProcessing": "enabled",
   "packageRules": [
     {
       "description": "GitHub Actions version updates",
