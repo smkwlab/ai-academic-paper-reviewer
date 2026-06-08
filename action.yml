@@ -7,14 +7,22 @@ branding:
 
 inputs:
   GEMINI_API_KEY:
-    description: "Gemini API Key"
+    description: "Gemini API Key (used when the provider resolves to Google)"
+    required: false
+    default: ""
+  ANTHROPIC_API_KEY:
+    description: "Anthropic API Key (used when the provider resolves to Anthropic)"
+    required: false
+    default: ""
+  AI_PROVIDER:
+    description: "Force provider: 'google' or 'anthropic'. Empty = infer from MODEL_CODE (claude* -> anthropic)."
     required: false
     default: ""
   GITHUB_TOKEN:
     description: "GitHub Token"
     required: true
   MODEL_CODE:
-    description: "Model code for Gemini"
+    description: "Model code, e.g. 'models/gemini-2.5-flash' or 'claude-sonnet-4-6'"
     default: "models/gemini-2.5-flash"
   LANGUAGE:
     description: "Preferred language for review comments"
@@ -41,7 +49,7 @@ runs:
         node-version: 22
 
     - name: Install dependencies
-      run: cd ${GITHUB_ACTION_PATH} && npm install
+      run: cd ${GITHUB_ACTION_PATH} && npm install --omit=dev
       shell: bash
 
     - name: Run review bot
@@ -50,6 +58,8 @@ runs:
       env:
         GEMINI_API_KEY: ${{ inputs.GEMINI_API_KEY }}
         GOOGLE_GENERATIVE_AI_API_KEY: ${{ inputs.GEMINI_API_KEY }}
+        ANTHROPIC_API_KEY: ${{ inputs.ANTHROPIC_API_KEY }}
+        AI_PROVIDER: ${{ inputs.AI_PROVIDER }}
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         GITHUB_OWNER: ${{ github.repository_owner }}
         GITHUB_REPO: ${{ github.event.pull_request.head.repo.name }}

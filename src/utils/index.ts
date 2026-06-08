@@ -1,5 +1,5 @@
 import { generateText, generateObject, NoObjectGeneratedError } from "ai";
-import { google } from "@ai-sdk/google";
+import { getModel } from "./provider";
 import { Octokit, RestEndpointMethodTypes } from "@octokit/rest";
 import { minimatch } from "minimatch";
 import { components } from "@octokit/openapi-types";
@@ -312,7 +312,7 @@ export function createParsedDiffText(parsedFiles: ParsedPullRequestFile[]): stri
 export const generateReviewCommentText: GenerateReviewCommentFn = async (params) => {
     const { modelCode, userPrompt } = params
     const { text } = await generateText({
-        model: google(modelCode),
+        model: getModel(modelCode),
         prompt: userPrompt,
     });
 
@@ -369,7 +369,7 @@ export const generateReviewCommentObject: GenerateReviewCommentFn = async (param
             async (attempt = 1) => {
                 return await generateObject({
                     schema: reviewSchema,
-                    model: google(modelCode),
+                    model: getModel(modelCode),
                     prompt: userPrompt,
                     // Use temperature 0 for first attempt, 0.5 for retries
                     temperature: attempt === 1 ? 0 : 0.5
