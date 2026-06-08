@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateAcademicReviewObject = exports.generateAcademicReviewText = void 0;
 const ai_1 = require("ai");
-const google_1 = require("@ai-sdk/google");
+const provider_1 = require("./provider");
 const zod_1 = require("zod");
 const index_1 = require("./index");
 /**
@@ -78,7 +78,7 @@ const academicPriorityOrder = {
 const generateAcademicReviewText = (params) => __awaiter(void 0, void 0, void 0, function* () {
     const { modelCode, userPrompt } = params;
     const { text } = yield (0, ai_1.generateText)({
-        model: (0, google_1.google)(modelCode),
+        model: (0, provider_1.getModel)(modelCode),
         prompt: userPrompt,
     });
     return { body: text };
@@ -96,7 +96,7 @@ const generateAcademicReviewObject = (params) => __awaiter(void 0, void 0, void 
         const { object } = yield (0, index_1.withRetry)((...args_1) => __awaiter(void 0, [...args_1], void 0, function* (attempt = 1) {
             return yield (0, ai_1.generateObject)({
                 schema: academicReviewSchema,
-                model: (0, google_1.google)(modelCode),
+                model: (0, provider_1.getModel)(modelCode),
                 prompt: userPrompt,
                 temperature: attempt === 1 ? 0 : 0.5
             });

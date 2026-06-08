@@ -1,5 +1,5 @@
 import { generateText, generateObject, NoObjectGeneratedError } from "ai";
-import { google } from "@ai-sdk/google";
+import { getModel } from "./provider";
 import { z } from "zod";
 import { GenerateReviewCommentFn, GenerateReviewCommentFnParams, ReviewCommentContent, withRetry } from "./index";
 
@@ -86,7 +86,7 @@ const academicPriorityOrder = {
 export const generateAcademicReviewText: GenerateReviewCommentFn = async (params) => {
     const { modelCode, userPrompt } = params;
     const { text } = await generateText({
-        model: google(modelCode),
+        model: getModel(modelCode),
         prompt: userPrompt,
     });
 
@@ -108,7 +108,7 @@ export const generateAcademicReviewObject: GenerateReviewCommentFn = async (para
             async (attempt = 1) => {
                 return await generateObject({
                     schema: academicReviewSchema,
-                    model: google(modelCode),
+                    model: getModel(modelCode),
                     prompt: userPrompt,
                     temperature: attempt === 1 ? 0 : 0.5
                 });

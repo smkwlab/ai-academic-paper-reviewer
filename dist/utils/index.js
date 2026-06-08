@@ -19,7 +19,7 @@ exports.createReviewPrompt = createReviewPrompt;
 exports.createParsedDiffText = createParsedDiffText;
 exports.runReviewBotVercelAI = runReviewBotVercelAI;
 const ai_1 = require("ai");
-const google_1 = require("@ai-sdk/google");
+const provider_1 = require("./provider");
 const rest_1 = require("@octokit/rest");
 const minimatch_1 = require("minimatch");
 const diff_1 = require("diff");
@@ -219,7 +219,7 @@ function createParsedDiffText(parsedFiles) {
 const generateReviewCommentText = (params) => __awaiter(void 0, void 0, void 0, function* () {
     const { modelCode, userPrompt } = params;
     const { text } = yield (0, ai_1.generateText)({
-        model: (0, google_1.google)(modelCode),
+        model: (0, provider_1.getModel)(modelCode),
         prompt: userPrompt,
     });
     return { body: text };
@@ -260,7 +260,7 @@ const generateReviewCommentObject = (params) => __awaiter(void 0, void 0, void 0
         const { object } = yield withRetry((...args_1) => __awaiter(void 0, [...args_1], void 0, function* (attempt = 1) {
             return yield (0, ai_1.generateObject)({
                 schema: reviewSchema,
-                model: (0, google_1.google)(modelCode),
+                model: (0, provider_1.getModel)(modelCode),
                 prompt: userPrompt,
                 // Use temperature 0 for first attempt, 0.5 for retries
                 temperature: attempt === 1 ? 0 : 0.5
