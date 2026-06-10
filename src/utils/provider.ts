@@ -1,6 +1,6 @@
 import { google } from "@ai-sdk/google";
 import { anthropic } from "@ai-sdk/anthropic";
-import type { LanguageModelV1 } from "ai";
+import type { LanguageModel } from "ai";
 
 export type AIProvider = "google" | "anthropic";
 
@@ -30,7 +30,7 @@ export function apiKeyEnvName(provider: AIProvider): string {
 }
 
 /** Build the Vercel AI SDK model for the resolved provider. */
-export function getModel(modelCode: string): LanguageModelV1 {
+export function getModel(modelCode: string): LanguageModel {
     return resolveProvider(modelCode) === "anthropic"
         ? anthropic(modelCode)
         : google(modelCode);
