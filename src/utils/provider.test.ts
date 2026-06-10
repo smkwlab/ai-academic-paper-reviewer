@@ -37,8 +37,15 @@ describe("supportsTemperature", () => {
         expect(supportsTemperature("claude-fable-5")).toBe(false);
     });
 
+    it("returns false for future Anthropic versions on the same trajectory", () => {
+        expect(supportsTemperature("claude-opus-4-9")).toBe(false); // future Opus 4.x
+        expect(supportsTemperature("claude-opus-5-0")).toBe(false); // future Opus 5+
+        expect(supportsTemperature("claude-fable-6")).toBe(false); // future Fable
+    });
+
     it("returns true for older Anthropic models that still accept temperature", () => {
         expect(supportsTemperature("claude-opus-4-6")).toBe(true);
+        expect(supportsTemperature("claude-opus-4-5")).toBe(true);
         expect(supportsTemperature("claude-sonnet-4-6")).toBe(true);
         expect(supportsTemperature("claude-haiku-4-5")).toBe(true);
     });

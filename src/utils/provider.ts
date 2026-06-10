@@ -48,9 +48,13 @@ export function getModel(modelCode: string): LanguageModelV1 {
  */
 export function supportsTemperature(modelCode: string): boolean {
     // Fable 5 and later removed sampling parameters entirely.
-    if (/fable/i.test(modelCode)) return false;
-    // Claude Opus 4.7 / 4.8 (and later 4.x) removed them too; 4.6 still accepts.
-    const opus = modelCode.match(/opus-4-(\d+)/i);
-    if (opus && Number(opus[1]) >= 7) return false;
+    const fable = modelCode.match(/fable-(\d+)/i);
+    if (fable && Number(fable[1]) >= 5) return false;
+    // Opus 4.7+ and Opus 5+ removed them too; Opus 4.6 and earlier still accept.
+    const opus = modelCode.match(/opus-(\d+)-(\d+)/i);
+    if (opus) {
+        const [major, minor] = [Number(opus[1]), Number(opus[2])];
+        if (major > 4 || (major === 4 && minor >= 7)) return false;
+    }
     return true;
 }
