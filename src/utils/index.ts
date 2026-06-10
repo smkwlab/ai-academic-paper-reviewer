@@ -309,6 +309,102 @@ export function createParsedDiffText(parsedFiles: ParsedPullRequestFile[]): stri
         .join("\n");
 }
 
+type InlineComment = NonNullable<ReviewCommentContent["comments"]>[number];
+
+/**
+ * Build, per file path, the set of new-file line numbers that can anchor an
+ * inline review comment — i.e. the lines present in the diff on the RIGHT side:
+ * added ("+") and context (" ") lines. Removed ("-") lines exist only on the
+ * old side and cannot anchor a RIGHT-side comment, and the "\ No newline at end
+ * of file" marker is not a real line.
+ *
+ * GitHub's review API rejects the WHOLE review (422 "line ... could not be
+ * resolved") if any single comment targets a line outside these, so callers use
+ * this to drop out-of-diff comments before posting.
+ */
+export function collectValidCommentLines(
+    parsedFiles: { filename: string; patch: ParsedDiff[] }[]
+): Map<string, Set<number>> {
+    const map = new Map<string, Set<number>>();
+    for (const file of parsedFiles) {
+        const lines = new Set<number>();
+        for (const diff of file.patch) {
+            for (const hunk of diff.hunks) {
+                let newLine = hunk.newStart;
+                for (const line of hunk.lines) {
+                    switch (line[0]) {
+                        case "-":
+                            // old side only; does not advance the new-file line
+                            break;
+                        case "\\":
+                            // "\ No newline at end of file" — not a real line
+                            break;
+                        case "+":
+                            lines.add(newLine);
+                            newLine++;
+                            break;
+                        default:
+                            // context line: commentable and advances new-file line
+                            lines.add(newLine);
+                            newLine++;
+                            break;
+                    }
+                }
+            }
+        }
+        map.set(file.filename, lines);
+    }
+    return map;
+}
+
+/**
+ * Partition inline comments into those that target a line within the diff
+ * (`valid`) and those that do not (`invalid`), using the set built by
+ * {@link collectValidCommentLines}. A comment whose file is absent from the map,
+ * or whose line is undefined, is treated as invalid.
+ */
+export function partitionCommentsByValidLines(
+    comments: InlineComment[],
+    validLines: Map<string, Set<number>>
+): { valid: InlineComment[]; invalid: InlineComment[] } {
+    const valid: InlineComment[] = [];
+    const invalid: InlineComment[] = [];
+    for (const comment of comments) {
+        const set = validLines.get(comment.path);
+        if (comment.line != null && set?.has(comment.line)) {
+            valid.push(comment);
+        } else {
+            invalid.push(comment);
+        }
+    }
+    return { valid, invalid };
+}
+
+/** Heading for the folded-comments section, localized to the review language. */
+function foldedCommentsHeading(language: string): string {
+    if (/japanese|日本語/i.test(language)) {
+        return "diff 範囲外のため inline で投稿できなかったコメント:";
+    }
+    return "Comments outside the diff (could not be posted inline):";
+}
+
+/**
+ * Render inline comments as a Markdown list so they can be folded into the
+ * review body when they cannot be posted inline (out-of-diff, or a failed
+ * inline post). Keeps the feedback visible instead of silently dropping it.
+ * The heading follows the review `language` (Japanese or English fallback).
+ */
+export function renderCommentsAsBodySection(
+    comments: InlineComment[],
+    language: string = "English"
+): string {
+    if (!comments.length) return "";
+    const items = comments
+        .map((c) => `- \`${c.path}:${c.line ?? "?"}\` — ${c.body}`)
+        .join("\n");
+    return `\n\n---\n\n**${foldedCommentsHeading(language)}**\n${items}`;
+}
+
 export const generateReviewCommentText: GenerateReviewCommentFn = async (params) => {
     const { modelCode, userPrompt } = params
     const { text } = await generateText({
@@ -475,14 +571,54 @@ export async function runReviewBotVercelAI({
         console.log("--- Review ---");
         console.log(reviewCommentContent);
 
-        // 8. GitHub にレビュー文を投稿
-        await postReviewCommentFn({
-            octokit,
-            owner,
-            repo,
-            pullNumber,
-            reviewCommentContent,
-        });
+        // 7.5 Filter inline comments to lines that are within the diff. GitHub's
+        // review API rejects the WHOLE review (422) if any comment targets a line
+        // outside the diff hunks, so drop those and fold them into the body so the
+        // feedback is preserved instead of silently lost.
+        if (reviewCommentContent.comments?.length) {
+            const validLines = collectValidCommentLines(parsedFilesData);
+            const { valid, invalid } = partitionCommentsByValidLines(
+                reviewCommentContent.comments,
+                validLines
+            );
+            if (invalid.length) {
+                console.log(
+                    `Dropping ${invalid.length} inline comment(s) outside the diff; folding into the review body.`
+                );
+                reviewCommentContent = {
+                    body: (reviewCommentContent.body ?? "") + renderCommentsAsBodySection(invalid, language),
+                    comments: valid,
+                };
+            }
+        }
+
+        // 8. GitHub にレビュー文を投稿。万一インライン投稿が拒否されても（フィルタ
+        // が取りこぼした端ケース等）、コメントを body に畳んで要約のみで再投稿し、
+        // 「レビューは走ったが投稿ゼロ」の無言失敗を避ける。
+        try {
+            await postReviewCommentFn({
+                octokit,
+                owner,
+                repo,
+                pullNumber,
+                reviewCommentContent,
+            });
+        } catch (postError) {
+            console.error(
+                "Inline review post failed; retrying as a body-only summary comment.",
+                postError
+            );
+            const foldedBody =
+                (reviewCommentContent.body ?? "") +
+                renderCommentsAsBodySection(reviewCommentContent.comments ?? [], language);
+            await postReviewCommentFn({
+                octokit,
+                owner,
+                repo,
+                pullNumber,
+                reviewCommentContent: { body: foldedBody, comments: [] },
+            });
+        }
 
     } catch (error) {
         console.error("Error in runReviewBotVercelAI:", error);
