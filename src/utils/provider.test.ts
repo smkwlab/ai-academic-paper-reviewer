@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolveProvider, apiKeyEnvName } from "./provider";
+import { resolveProvider, apiKeyEnvName, supportsTemperature } from "./provider";
 
 describe("resolveProvider", () => {
     it("honours an explicit provider (case-insensitive), overriding the model code", () => {
@@ -26,5 +26,25 @@ describe("apiKeyEnvName", () => {
     it("maps each provider to its API key env var", () => {
         expect(apiKeyEnvName("anthropic")).toBe("ANTHROPIC_API_KEY");
         expect(apiKeyEnvName("google")).toBe("GEMINI_API_KEY");
+    });
+});
+
+describe("supportsTemperature", () => {
+    it("returns false for newer Anthropic models that removed sampling params", () => {
+        expect(supportsTemperature("claude-opus-4-7")).toBe(false);
+        expect(supportsTemperature("claude-opus-4-8")).toBe(false);
+        expect(supportsTemperature("CLAUDE-OPUS-4-8")).toBe(false);
+        expect(supportsTemperature("claude-fable-5")).toBe(false);
+    });
+
+    it("returns true for older Anthropic models that still accept temperature", () => {
+        expect(supportsTemperature("claude-opus-4-6")).toBe(true);
+        expect(supportsTemperature("claude-sonnet-4-6")).toBe(true);
+        expect(supportsTemperature("claude-haiku-4-5")).toBe(true);
+    });
+
+    it("returns true for Google (Gemini) models", () => {
+        expect(supportsTemperature("models/gemini-2.5-flash")).toBe(true);
+        expect(supportsTemperature("models/gemini-2.0-flash")).toBe(true);
     });
 });

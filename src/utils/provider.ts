@@ -35,3 +35,22 @@ export function getModel(modelCode: string): LanguageModelV1 {
         ? anthropic(modelCode)
         : google(modelCode);
 }
+
+/**
+ * Whether a model accepts the `temperature` sampling parameter.
+ *
+ * Newer Anthropic models removed `temperature` (along with `top_p` / `top_k`):
+ * sending it returns a 400 ("`temperature` is deprecated for this model").
+ * Affected: Claude Opus 4.7+ and Claude Fable 5+. Opus 4.6 and earlier,
+ * Sonnet, Haiku, and all Google (Gemini) models still accept it.
+ *
+ * Ref: https://platform.claude.com/docs/en/about-claude/models/migration-guide
+ */
+export function supportsTemperature(modelCode: string): boolean {
+    // Fable 5 and later removed sampling parameters entirely.
+    if (/fable/i.test(modelCode)) return false;
+    // Claude Opus 4.7 / 4.8 (and later 4.x) removed them too; 4.6 still accepts.
+    const opus = modelCode.match(/opus-4-(\d+)/i);
+    if (opus && Number(opus[1]) >= 7) return false;
+    return true;
+}

@@ -1,5 +1,5 @@
 import { generateText, generateObject, NoObjectGeneratedError } from "ai";
-import { getModel } from "./provider";
+import { getModel, supportsTemperature } from "./provider";
 import { Octokit, RestEndpointMethodTypes } from "@octokit/rest";
 import { minimatch } from "minimatch";
 import { components } from "@octokit/openapi-types";
@@ -467,8 +467,11 @@ export const generateReviewCommentObject: GenerateReviewCommentFn = async (param
                     schema: reviewSchema,
                     model: getModel(modelCode),
                     prompt: userPrompt,
-                    // Use temperature 0 for first attempt, 0.5 for retries
-                    temperature: attempt === 1 ? 0 : 0.5
+                    // Use temperature 0 for first attempt, 0.5 for retries.
+                    // Newer Anthropic models reject `temperature` (400); omit it there.
+                    ...(supportsTemperature(modelCode)
+                        ? { temperature: attempt === 1 ? 0 : 0.5 }
+                        : {})
                 });
             },
             {
