@@ -345,13 +345,9 @@ const generateReviewCommentObject = (params) => __awaiter(void 0, void 0, void 0
     try {
         // Use the retry mechanism for handling NoObjectGeneratedError
         const { object } = yield withRetry((...args_1) => __awaiter(void 0, [...args_1], void 0, function* (attempt = 1) {
-            return yield (0, ai_1.generateObject)({
-                schema: reviewSchema,
-                model: (0, provider_1.getModel)(modelCode),
-                prompt: userPrompt,
-                // Use temperature 0 for first attempt, 0.5 for retries
-                temperature: attempt === 1 ? 0 : 0.5
-            });
+            return yield (0, ai_1.generateObject)(Object.assign({ schema: reviewSchema, model: (0, provider_1.getModel)(modelCode), prompt: userPrompt }, ((0, provider_1.supportsTemperature)(modelCode)
+                ? { temperature: attempt === 1 ? 0 : 0.5 }
+                : {})));
         }), {
             maxAttempts: 3,
             initialDelayMs: 2000,

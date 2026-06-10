@@ -1,5 +1,5 @@
 import { generateText, generateObject, NoObjectGeneratedError } from "ai";
-import { getModel } from "./provider";
+import { getModel, supportsTemperature } from "./provider";
 import { z } from "zod";
 import { GenerateReviewCommentFn, GenerateReviewCommentFnParams, ReviewCommentContent, withRetry } from "./index";
 
@@ -110,7 +110,10 @@ export const generateAcademicReviewObject: GenerateReviewCommentFn = async (para
                     schema: academicReviewSchema,
                     model: getModel(modelCode),
                     prompt: userPrompt,
-                    temperature: attempt === 1 ? 0 : 0.5
+                    // Newer Anthropic models reject `temperature` (400); omit it there.
+                    ...(supportsTemperature(modelCode)
+                        ? { temperature: attempt === 1 ? 0 : 0.5 }
+                        : {})
                 });
             },
             {

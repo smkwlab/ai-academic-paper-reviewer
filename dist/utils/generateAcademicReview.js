@@ -94,12 +94,9 @@ const generateAcademicReviewObject = (params) => __awaiter(void 0, void 0, void 
     const categoryMap = isJapanese ? categoryMapJa : categoryMapEn;
     try {
         const { object } = yield (0, index_1.withRetry)((...args_1) => __awaiter(void 0, [...args_1], void 0, function* (attempt = 1) {
-            return yield (0, ai_1.generateObject)({
-                schema: academicReviewSchema,
-                model: (0, provider_1.getModel)(modelCode),
-                prompt: userPrompt,
-                temperature: attempt === 1 ? 0 : 0.5
-            });
+            return yield (0, ai_1.generateObject)(Object.assign({ schema: academicReviewSchema, model: (0, provider_1.getModel)(modelCode), prompt: userPrompt }, ((0, provider_1.supportsTemperature)(modelCode)
+                ? { temperature: attempt === 1 ? 0 : 0.5 }
+                : {})));
         }), {
             maxAttempts: 3,
             initialDelayMs: 2000,
