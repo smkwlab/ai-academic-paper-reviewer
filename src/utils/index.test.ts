@@ -66,6 +66,8 @@ function commentableLinesFromDiffText(text: string): number[] {
         if (row.indexOf(SEPARATOR) !== GUTTER_WIDTH) continue;
         const gutter = row.slice(0, GUTTER_WIDTH);
         const marker = row.slice(GUTTER_WIDTH + SEPARATOR.length)[0];
+        // Meta lines also reach here (their blank gutter is GUTTER_WIDTH wide),
+        // but their marker is "\\", so they fall through this +/context filter.
         if (marker === "+" || marker === " ") {
             const right = gutter.slice(-NUM_WIDTH).trim(); // new-side number
             if (right) nums.push(Number(right));

@@ -182,6 +182,7 @@ function formatHunkWithLineNumbers(hunk) {
                 // AI が誤って line 番号を取らないよう数字は出さず空白で埋める。
                 // collectValidCommentLines も同じ前提で new 側カウンタを
                 // 進めないため、両者の行番号観が一致する。
+                // 幅 9 はガター = old 4 桁 + 空白 1 + new 4 桁 に合わせる。
                 lineNumbers = "         ";
                 break;
         }
