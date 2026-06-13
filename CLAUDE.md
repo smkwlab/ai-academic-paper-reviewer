@@ -34,7 +34,7 @@ ai-academic-paper-reviewer/
 
 ### AI/ML Components
 - **Gemini AI**: Google's generative AI for review analysis
-- **Model**: gemini-2.0-flash (default)
+- **Model**: gemini-2.5-flash (default)
 - **Language Support**: Japanese/English review output
 
 ### Integration Features

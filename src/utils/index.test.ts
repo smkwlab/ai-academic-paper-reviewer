@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { parsePatch } from "diff";
 import {
     collectValidCommentLines,
+    createParsedDiffText,
     partitionCommentsByValidLines,
     renderCommentsAsBodySection,
 } from "./index";
@@ -46,6 +47,63 @@ describe("collectValidCommentLines", () => {
         const patch = ["@@ -1 +1 @@", "-old", "+new", "\\ No newline at end of file"].join("\n");
         const map = collectValidCommentLines([parsedFile("n.ts", patch)]);
         expect([...map.get("n.ts")!]).toEqual([1]); // only the added "new" line
+    });
+});
+
+// Extract the new-side (RIGHT) line numbers that the AI-facing diff text
+// presents as commentable: added (`+`) and context (` `) lines. The line-number
+// gutter rendered by createParsedDiffText is exactly 9 chars wide, followed by
+// " | " and the original diff line.
+function commentableLinesFromDiffText(text: string): number[] {
+    const nums: number[] = [];
+    for (const row of text.split("\n")) {
+        if (row.indexOf(" | ") !== 9) continue;
+        const gutter = row.slice(0, 9);
+        const marker = row.slice(12)[0];
+        if (marker === "+" || marker === " ") {
+            const right = gutter.slice(5).trim(); // new-side number
+            if (right) nums.push(Number(right));
+        }
+    }
+    return nums.sort((a, b) => a - b);
+}
+
+describe("createParsedDiffText line numbering", () => {
+    // A diff whose removed and added lines both lack a trailing newline, so the
+    // parsed hunk interleaves "\ No newline at end of file" meta lines. The meta
+    // lines must NOT advance the line counters, otherwise the numbers shown to
+    // the AI drift past what collectValidCommentLines considers valid.
+    const META_PATCH = [
+        "@@ -1,2 +1,2 @@",
+        " ctx",
+        "-old",
+        "\\ No newline at end of file",
+        "+new",
+        "\\ No newline at end of file",
+    ].join("\n");
+
+    it("does not let 'No newline' meta lines advance line numbers", () => {
+        const text = createParsedDiffText([parsedFile("n.ts", META_PATCH)]);
+        // ctx is new line 1, "new" is new line 2; meta lines carry no number.
+        expect(commentableLinesFromDiffText(text)).toEqual([1, 2]);
+    });
+
+    it("matches collectValidCommentLines for a diff with meta lines", () => {
+        const parsed = [parsedFile("n.ts", META_PATCH)];
+        const valid = [...collectValidCommentLines(parsed).get("n.ts")!].sort(
+            (a, b) => a - b
+        );
+        const shown = commentableLinesFromDiffText(createParsedDiffText(parsed));
+        expect(shown).toEqual(valid);
+    });
+
+    it("matches collectValidCommentLines for a multi-hunk diff", () => {
+        const parsed = [parsedFile("a.ts", PATCH)];
+        const valid = [...collectValidCommentLines(parsed).get("a.ts")!].sort(
+            (a, b) => a - b
+        );
+        const shown = commentableLinesFromDiffText(createParsedDiffText(parsed));
+        expect(shown).toEqual(valid);
     });
 });
 
