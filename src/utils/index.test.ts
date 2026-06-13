@@ -50,18 +50,24 @@ describe("collectValidCommentLines", () => {
     });
 });
 
+// Layout of a rendered diff row produced by createParsedDiffText:
+// `<gutter><SEPARATOR><original diff line>`, where the gutter is a fixed-width
+// "<old> <new>" pair (each right-aligned to NUM_WIDTH) so its second half holds
+// the new-side number. These constants mirror that layout.
+const NUM_WIDTH = 4;
+const GUTTER_WIDTH = NUM_WIDTH + 1 + NUM_WIDTH; // "<old> <new>"
+const SEPARATOR = " | ";
+
 // Extract the new-side (RIGHT) line numbers that the AI-facing diff text
-// presents as commentable: added (`+`) and context (` `) lines. The line-number
-// gutter rendered by createParsedDiffText is exactly 9 chars wide, followed by
-// " | " and the original diff line.
+// presents as commentable: added (`+`) and context (` `) lines.
 function commentableLinesFromDiffText(text: string): number[] {
     const nums: number[] = [];
     for (const row of text.split("\n")) {
-        if (row.indexOf(" | ") !== 9) continue;
-        const gutter = row.slice(0, 9);
-        const marker = row.slice(12)[0];
+        if (row.indexOf(SEPARATOR) !== GUTTER_WIDTH) continue;
+        const gutter = row.slice(0, GUTTER_WIDTH);
+        const marker = row.slice(GUTTER_WIDTH + SEPARATOR.length)[0];
         if (marker === "+" || marker === " ") {
-            const right = gutter.slice(5).trim(); // new-side number
+            const right = gutter.slice(-NUM_WIDTH).trim(); // new-side number
             if (right) nums.push(Number(right));
         }
     }
