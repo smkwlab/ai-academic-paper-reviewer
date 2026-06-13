@@ -19,6 +19,7 @@ const academicCommentSchema = z.object({
         ),
     line: z
         .number()
+        .int()
         .positive()
         .describe(
             "The 1-based line number where the comment is placed. Corresponds to the new line number in the diff."

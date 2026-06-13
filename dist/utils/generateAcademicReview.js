@@ -26,6 +26,7 @@ const academicCommentSchema = zod_1.z.object({
         .describe("Specific and constructive feedback from an academic perspective. Include improvement suggestions from an educational viewpoint."),
     line: zod_1.z
         .number()
+        .int()
         .positive()
         .describe("The 1-based line number where the comment is placed. Corresponds to the new line number in the diff."),
     priority: zod_1.z
