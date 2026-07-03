@@ -138,7 +138,11 @@ jobs:
 
 ## Release / Versioning Policy
 
-- Releases are **immutable** `vX.Y.Z` / `vX.Y` tags. **Do not** add a workflow
+- Each release is cut as a **new, immutable** tag (this repo currently uses the
+  `vX.Y` form, e.g. `v1.9`) and published tags are **never** re-pushed or
+  force-moved. There is no floating minor pointer: the next change ships as a
+  new tag (`v1.10`), not a re-pushed `v1.9`. The only mutable tag was the major
+  `@v1` convenience alias, now retired. **Do not** add a workflow
   that force-moves a shared major tag (`git tag -fa v1 && push --force`): every
   `@v1` consumer would silently receive new code, and the GitHub Actions tarball
   cache can then serve stale/inconsistent code (the hazard the ecosystem

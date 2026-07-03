@@ -31,8 +31,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Academic Paper Review Bot
-        # Pin to an immutable version tag (or a full commit SHA) — the
-        # major tag is not force-moved, so `@v1` must not be relied on.
+        # Pin to an immutable version tag (or a full commit SHA) — the major
+        # tag `@v1` is not force-moved, so don't rely on it. `v1.9` is only an
+        # example; check the Releases page for the current tag (Dependabot can
+        # bump it for you).
         uses: smkwlab/ai-academic-paper-reviewer@v1.9
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,10 +50,10 @@ Then, set your Google AI Studio Gemini API Key as GEMINI_API_KEY in your reposit
 
 Releases are published as **immutable** `vX.Y.Z` (and `vX.Y`) tags. The major
 tag (`@v1`) is **not** force-moved to new releases, so consumers must not rely
-on it silently tracking the latest code. Pin to a specific version tag such as
-`@v1.9`, or to a full commit SHA, and let Dependabot bump it. This avoids the
-stale/inconsistent GitHub Actions tarball cache that can result when a shared
-tag is re-pushed.
+on it silently tracking the latest code. Pin to a specific version tag (see the
+[Releases](../../releases) page for the current one, e.g. `@v1.9`) or to a full
+commit SHA, and let Dependabot bump it. This avoids the stale/inconsistent
+GitHub Actions tarball cache that can result when a shared tag is re-pushed.
 
 ## Features
 

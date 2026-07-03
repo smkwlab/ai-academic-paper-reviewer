@@ -31,8 +31,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Academic Paper Review Bot
-        # 不変のバージョンタグ（または commit SHA）に固定する。
-        # major タグ `@v1` は force-move しないため依存しないこと。
+        # 不変のバージョンタグ（または commit SHA）に固定する。major タグ
+        # `@v1` は force-move しないため依存しないこと。`v1.9` は例示なので、
+        # 最新タグは Releases ページで確認する（Dependabot で自動 bump 可）。
         uses: smkwlab/ai-academic-paper-reviewer@v1.9
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
