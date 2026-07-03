@@ -48,8 +48,9 @@ Then, set your Google AI Studio Gemini API Key as GEMINI_API_KEY in your reposit
 
 ## Versioning
 
-Releases are published as **immutable** `vX.Y.Z` (and `vX.Y`) tags. The major
-tag (`@v1`) is **not** force-moved to new releases, so consumers must not rely
+Each release is published as a **new, immutable** tag (currently the `vX.Y`
+form, e.g. `v1.9`); published tags are never re-pushed. The major tag (`@v1`)
+is **not** force-moved to new releases, so consumers must not rely
 on it silently tracking the latest code. Pin to a specific version tag (see the
 [Releases](../../releases) page for the current one, e.g. `@v1.9`) or to a full
 commit SHA, and let Dependabot bump it. This avoids the stale/inconsistent
