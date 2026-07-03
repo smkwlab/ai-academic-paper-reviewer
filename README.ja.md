@@ -31,7 +31,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Academic Paper Review Bot
-        uses: toshi0806/ai-academic-paper-reviewer@v1
+        # 不変のバージョンタグ（または commit SHA）に固定する。major タグ
+        # `@v1` は force-move しないため依存しないこと。`v1.9` は例示なので、
+        # 最新タグは Releases ページで確認する（Dependabot で自動 bump 可）。
+        uses: smkwlab/ai-academic-paper-reviewer@v1.9
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -42,6 +45,10 @@ jobs:
 ```
 
 その後、リポジトリのGitHub Secretsに`GEMINI_API_KEY`としてGoogle AI StudioのGemini APIキーを設定してください。
+
+## バージョニング
+
+各リリースは**新しい不変**タグ（現状は `vX.Y` 形式、例 `v1.9`）として公開され、公開済みタグは再プッシュしません。major タグ（`@v1`）は新リリースへ force-move しないため、利用者はこれが最新コードを暗黙的に追跡することに依存してはいけません。特定のバージョンタグ（現行タグは [Releases](../../releases) ページを参照、例 `@v1.9`）か full commit SHA に固定し、Dependabot で bump してください。これにより、共有タグを再プッシュした際に生じうる GitHub Actions の tarball キャッシュの陳腐化・不整合を回避できます。
 
 ## 機能
 

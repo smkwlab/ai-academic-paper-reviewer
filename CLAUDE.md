@@ -136,6 +136,23 @@ jobs:
 - **API Costs**: Monitor Gemini API usage for cost management
 - **Customization**: Adapt review criteria for specific academic programs
 
+## Release / Versioning Policy
+
+- Each release is cut as a **new, immutable** tag (this repo currently uses the
+  `vX.Y` form, e.g. `v1.9`) and published tags are **never** re-pushed or
+  force-moved. There is no floating minor pointer: the next change ships as a
+  new tag (`v1.10`), not a re-pushed `v1.9`. The only mutable tag was the major
+  `@v1` convenience alias, now frozen (the `v1` tag still exists but is no
+  longer updated/force-moved). **Do not** add a workflow
+  that force-moves a shared major tag (`git tag -fa v1 && push --force`): every
+  `@v1` consumer would silently receive new code, and the GitHub Actions tarball
+  cache can then serve stale/inconsistent code (the hazard the ecosystem
+  `CLAUDE.md` warns about). The old `release-updater.yml` mover was removed for
+  this reason (smkwlab/.github#69, E-4).
+- Consumers pin to a specific version tag (`@v1.9`) or a full commit SHA and let
+  Dependabot bump it. Cut a **new** tag for each change — never re-push a
+  published one.
+
 ## Security Considerations
 
 - Secure handling of GEMINI_API_KEY
