@@ -31,7 +31,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Academic Paper Review Bot
-        uses: toshi0806/ai-academic-paper-reviewer@v1
+        # 不変のバージョンタグ（または commit SHA）に固定する。
+        # major タグ `@v1` は force-move しないため依存しないこと。
+        uses: smkwlab/ai-academic-paper-reviewer@v1.9
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
