@@ -3,7 +3,7 @@ import { getModel, supportsTemperature } from "./provider";
 import { Octokit, RestEndpointMethodTypes } from "@octokit/rest";
 import { minimatch } from "minimatch";
 import { components } from "@octokit/openapi-types";
-import { Hunk, ParsedDiff, parsePatch } from "diff";
+import { StructuredPatchHunk, StructuredPatch, parsePatch } from "diff";
 import { z } from "zod"
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -62,7 +62,7 @@ type PullRequestFile = components["schemas"]["diff-entry"];
 type PullRequestFiles = PullRequestFile[];
 
 type ParsedPullRequestFile = Omit<PullRequestFile, "patch"> & {
-    patch: ParsedDiff[];
+    patch: StructuredPatch[];
 };
 
 export type GenerateReviewCommentFnParams = {
@@ -227,7 +227,7 @@ export const dryRunPostReviewComment: PostReviewCommentFn = async (params) => {
 /**
  * Hunk を行番号付きの文字列にフォーマットする
  */
-function formatHunkWithLineNumbers(hunk: Hunk): string {
+function formatHunkWithLineNumbers(hunk: StructuredPatchHunk): string {
     let oldLine = hunk.oldStart;
     let newLine = hunk.newStart;
 
@@ -332,7 +332,7 @@ type InlineComment = NonNullable<ReviewCommentContent["comments"]>[number];
  * this to drop out-of-diff comments before posting.
  */
 export function collectValidCommentLines(
-    parsedFiles: { filename: string; patch: ParsedDiff[] }[]
+    parsedFiles: { filename: string; patch: StructuredPatch[] }[]
 ): Map<string, Set<number>> {
     const map = new Map<string, Set<number>>();
     for (const file of parsedFiles) {
