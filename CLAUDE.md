@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Academic Paper Review Bot
-        uses: toshi0806/ai-academic-paper-reviewer@v1
+        uses: smkwlab/ai-academic-paper-reviewer@v1.9
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -150,8 +150,9 @@ jobs:
   `CLAUDE.md` warns about). The old `release-updater.yml` mover was removed for
   this reason (smkwlab/.github#69, E-4).
 - Consumers pin to a specific version tag (`@v1.9`) or a full commit SHA and let
-  Dependabot bump it. Cut a **new** tag for each change — never re-push a
-  published one.
+  Renovate bump it (GitHub Actions are managed org-wide by the shared Renovate
+  preset; Dependabot is no longer used). Cut a **new** tag for each change —
+  never re-push a published one.
 
 ## Security Considerations
 
