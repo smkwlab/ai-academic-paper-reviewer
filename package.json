@@ -29,7 +29,6 @@
   },
   "homepage": "https://github.com/toshi0806/ai-academic-paper-reviewer#readme",
   "devDependencies": {
-    "@types/diff": "^6.0.0",
     "@types/node": "^22.10.2",
     "esbuild-register": "^3.6.0",
     "typescript": "^5.7.2",
@@ -40,9 +39,9 @@
     "@ai-sdk/google": "^3.0.0",
     "@octokit/rest": "^21.0.2",
     "ai": "^6.0.0",
-    "diff": "^7.0.0",
+    "diff": "^9.0.0",
     "dotenv": "^16.4.7",
-    "minimatch": "^10.0.1",
+    "minimatch": "^10.2.5",
     "zod": "^3.25.76"
   }
 }
