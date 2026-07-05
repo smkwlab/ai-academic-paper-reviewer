@@ -1,5 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>smkwlab/.github:latex#v1"],
-  "forkProcessing": "enabled"
+  "forkProcessing": "enabled",
+  "packageRules": [
+    {
+      "description": "Keep the smkwlab/.github reusable-workflow reference on the mutable @v1 channel: digest-pinning would freeze it and cut this repo off from centrally distributed updates",
+      "matchPackageNames": ["smkwlab/.github"],
+      "pinDigests": false
+    }
+  ]
 }
