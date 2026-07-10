@@ -76,7 +76,7 @@ This action is designed to integrate with the broader LaTeX thesis environment e
 
 - **sotsuron-template**: Undergraduate/graduate thesis templates
 - **latex-environment**: Development environment setup
-- **thesis-management-tools**: Administrative workflows
+- **student-repo-management**: Administrative workflows
 
 ### Typical Workflow Integration
 ```yaml
