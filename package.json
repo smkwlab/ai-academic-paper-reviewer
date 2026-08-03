@@ -29,19 +29,19 @@
   },
   "homepage": "https://github.com/toshi0806/ai-academic-paper-reviewer#readme",
   "devDependencies": {
-    "@types/node": "^22.10.2",
+    "@types/node": "^22.20.1",
     "esbuild-register": "^3.6.0",
-    "typescript": "^5.7.2",
-    "vitest": "^4.1.8"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.104",
     "@ai-sdk/google": "^3.0.103",
-    "@octokit/rest": "^21.0.2",
-    "ai": "^6.0.0",
+    "@octokit/rest": "^21.1.1",
+    "ai": "^6.0.240",
     "diff": "^9.0.0",
-    "dotenv": "^16.4.7",
-    "minimatch": "^10.2.5",
+    "dotenv": "^16.6.1",
+    "minimatch": "^10.2.6",
     "zod": "^4.4.3"
   }
 }
