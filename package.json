@@ -38,7 +38,7 @@
     "@ai-sdk/anthropic": "^3.0.104",
     "@ai-sdk/google": "^3.0.103",
     "@octokit/rest": "^21.1.1",
-    "ai": "^6.0.240",
+    "ai": "^7.0.48",
     "diff": "^9.0.0",
     "dotenv": "^16.6.1",
     "minimatch": "^10.2.6",
