@@ -8,6 +8,14 @@
 #
 # This does NOT bring back the major-tag mover removed in #36. It only ever
 # creates a new tag; the frozen `v1` alias is never touched.
+#
+# Why not release-please or semantic-release: both decide whether to release
+# from the commit type, and this action is a thin wrapper whose substance is its
+# dependencies. Of the 22 commits behind the v1.10 release, nine were
+# `chore(deps)` and none were `feat` or `fix` — under either tool's defaults that
+# release, npm audit fix included, would never have been cut. Making them work
+# here means pushing Renovate to emit `fix(deps)` and still writing the dist/
+# check by hand, so the bespoke part moves rather than goes away.
 name: Release
 
 on:
