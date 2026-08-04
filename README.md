@@ -33,7 +33,7 @@ jobs:
       - name: Academic Paper Review Bot
         # Pin to an immutable version tag (or a full commit SHA) — the major
         # tag `@v1` is not force-moved, so don't rely on it. `v1.9` is only an
-        # example; check the Releases page for the current tag (Dependabot can
+        # example; check the Releases page for the current tag (Renovate can
         # bump it for you).
         uses: smkwlab/ai-academic-paper-reviewer@v1.9
         with:
@@ -53,7 +53,7 @@ form, e.g. `v1.9`); published tags are never re-pushed. The major tag (`@v1`)
 is **not** force-moved to new releases, so consumers must not rely
 on it silently tracking the latest code. Pin to a specific version tag (see the
 [Releases](../../releases) page for the current one, e.g. `@v1.9`) or to a full
-commit SHA, and let Dependabot bump it. This avoids the stale/inconsistent
+commit SHA, and let Renovate bump it. This avoids the stale/inconsistent
 GitHub Actions tarball cache that can result when a shared tag is re-pushed.
 
 ## Features

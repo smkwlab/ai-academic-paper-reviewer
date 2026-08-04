@@ -153,6 +153,23 @@ jobs:
   Renovate bump it (GitHub Actions are managed org-wide by the shared Renovate
   preset; Dependabot is no longer used). Cut a **new** tag for each change —
   never re-push a published one.
+- Releases are cut by `.github/workflows/release.yml`, not by hand. Anything
+  reaching `main` that consumers actually run — `src/`, `dist/`, `action.yml`,
+  `package.json`, `package-lock.json` — publishes the next `vX.Y` tag and a
+  release. Documentation and workflow changes do not.
+  - This exists because releases used to depend on someone remembering. Renovate
+    can only bump a pin to a tag that exists, so when no tag was cut nothing
+    moved, and `main` drifted for two months and 22 commits — an npm audit fix
+    among them — before anyone noticed (#65). Nothing broke, which is why it
+    went unnoticed.
+  - Dependency-only changes release too. The action executes the committed
+    `dist/`, so a dependency bump *is* a change to what consumers run.
+  - The workflow re-runs the tests, the build and the `dist/` check itself
+    rather than trusting the CI run on the same commit. A tag whose `dist/`
+    does not match `src/` is worse than no tag: the version advances while the
+    executed code does not.
+  - A major bump stays a human act. Tag `v2.0` by hand and the workflow
+    continues from there.
 
 ## Security Considerations
 

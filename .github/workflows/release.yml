@@ -1,0 +1,120 @@
+# Publishes a new immutable tag and release whenever something that consumers
+# actually run reaches main.
+#
+# Why this exists: consumers pin an exact tag (see the Release / Versioning
+# Policy in CLAUDE.md) and Renovate bumps that pin — but it can only bump to a
+# tag that exists. With releases cut by hand, main drifted for two months and
+# 22 commits, including an npm audit fix, never reached anyone (#65).
+#
+# This does NOT bring back the major-tag mover removed in #36. It only ever
+# creates a new tag; the frozen `v1` alias is never touched.
+name: Release
+
+on:
+  push:
+    branches: [main]
+    # Path-based, not commit-type-based. The action runs the committed dist/ at
+    # runtime, so a dependency bump IS a change to what consumers execute —
+    # treating `chore(deps)` as not worth releasing is what produced #65. What
+    # must not cut a release is a change consumers never see, and a `docs:`
+    # commit that happens to touch dist/ would slip past a type check.
+    paths:
+      - 'src/**'
+      - 'dist/**'
+      - 'action.yml'
+      - 'package.json'
+      - 'package-lock.json'
+  # Escape hatch: publish the current main on demand. Needed when a release has
+  # to go out for something the path filter deliberately ignores, and it is the
+  # only way to exercise this workflow without waiting for a source change.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Serialize so two merges landing together cannot compute the same next tag.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # A re-run of this workflow would otherwise cut a second release for a
+      # commit that already has one.
+      - name: Skip if this commit is already released
+        id: guard
+        run: |
+          existing=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+$' | head -1)
+          if [ -n "$existing" ]; then
+            echo "::notice::${GITHUB_SHA} is already released as ${existing}"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        if: steps.guard.outputs.skip != 'true'
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.guard.outputs.skip != 'true'
+        run: npm ci
+
+      - name: Unit tests
+        if: steps.guard.outputs.skip != 'true'
+        run: npm test
+
+      - name: Build
+        if: steps.guard.outputs.skip != 'true'
+        run: npm run build
+
+      # Deliberately re-checked here rather than trusting the CI run on the same
+      # commit. Shipping a tag whose dist/ does not match src/ is worse than not
+      # shipping: the tag advances while the code consumers execute does not.
+      - name: Verify dist is up to date
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          if ! git diff --quiet -- dist; then
+            echo "::error::dist/ is out of date — run 'npm run build' and commit dist/."
+            git diff --stat -- dist
+            exit 1
+          fi
+
+      # Tags are vX.Y (CLAUDE.md). sort -V is what orders v1.9 before v1.10;
+      # the grep drops the frozen bare `v1` alias and the retired vX.Y.Z tags.
+      # A major bump stays a human act: tag v2.0 by hand and this picks up from
+      # there.
+      - name: Compute the next tag
+        id: next
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          latest=$(git tag -l | grep -E '^v[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          if [ -z "$latest" ]; then
+            echo "::error::no vX.Y tag found — refusing to guess a starting version"
+            exit 1
+          fi
+          major=${latest#v}; major=${major%%.*}
+          minor=${latest##*.}
+          next="v${major}.$((minor + 1))"
+          echo "::notice::${latest} -> ${next}"
+          echo "tag=${next}" >> "$GITHUB_OUTPUT"
+
+      - name: Tag and publish
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.next.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+          gh release create "$TAG" --title "$TAG" --generate-notes
