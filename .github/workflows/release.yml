@@ -106,15 +106,22 @@ jobs:
           next="v${major}.$((minor + 1))"
           echo "::notice::${latest} -> ${next}"
           echo "tag=${next}" >> "$GITHUB_OUTPUT"
+          echo "prev=${latest}" >> "$GITHUB_OUTPUT"
 
       - name: Tag and publish
         if: steps.guard.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.next.outputs.tag }}
+          PREV: ${{ steps.next.outputs.prev }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -a "$TAG" -m "Release $TAG"
           git push origin "$TAG"
-          gh release create "$TAG" --title "$TAG" --generate-notes
+          # --notes-start-tag is explicit because bare --generate-notes derives
+          # the range from the previous *release*, and several tags here
+          # (v1.3, v1.4, v1.8, v1.9) never got one. Anchoring to the previous
+          # vX.Y tag keeps the range right regardless of that history.
+          gh release create "$TAG" --title "$TAG" \
+            --generate-notes --notes-start-tag "$PREV"
