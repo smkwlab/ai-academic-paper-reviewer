@@ -54,12 +54,17 @@ jobs:
           fetch-depth: 0
 
       # A re-run of this workflow would otherwise cut a second release for a
-      # commit that already has one.
+      # commit that already has one. It guards against a repeat of an automatic
+      # run, so it does not apply to workflow_dispatch — there a human is asking
+      # for a release on purpose, and refusing would make the escape hatch
+      # useless exactly when the head commit is already tagged.
       - name: Skip if this commit is already released
         id: guard
+        env:
+          EVENT: ${{ github.event_name }}
         run: |
           existing=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+$' | head -1)
-          if [ -n "$existing" ]; then
+          if [ -n "$existing" ] && [ "$EVENT" != workflow_dispatch ]; then
             echo "::notice::${GITHUB_SHA} is already released as ${existing}"
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
@@ -123,13 +128,16 @@ jobs:
           TAG: ${{ steps.next.outputs.tag }}
           PREV: ${{ steps.next.outputs.prev }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$TAG" -m "Release $TAG"
-          git push origin "$TAG"
+          # gh creates the tag as part of creating the release, in one API call.
+          # Pushing the tag separately first would leave the tag behind if the
+          # release call then failed — and the guard above would read that tag on
+          # the next run and skip, so the release could never be made.
+          #
           # --notes-start-tag is explicit because bare --generate-notes derives
           # the range from the previous *release*, and several tags here
           # (v1.3, v1.4, v1.8, v1.9) never got one. Anchoring to the previous
           # vX.Y tag keeps the range right regardless of that history.
-          gh release create "$TAG" --title "$TAG" \
+          gh release create "$TAG" \
+            --target "$GITHUB_SHA" \
+            --title "$TAG" \
             --generate-notes --notes-start-tag "$PREV"
