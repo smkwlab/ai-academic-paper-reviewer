@@ -32,13 +32,13 @@
     "@types/node": "^24.13.3",
     "esbuild-register": "^3.6.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.39",
-    "@ai-sdk/google": "^4.0.44",
+    "@ai-sdk/anthropic": "^4.0.41",
+    "@ai-sdk/google": "^4.0.50",
     "@octokit/rest": "^22.0.1",
-    "ai": "^7.0.66",
+    "ai": "^7.0.77",
     "diff": "^9.0.0",
     "dotenv": "^17.4.2",
     "minimatch": "^10.2.6",
