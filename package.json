@@ -35,13 +35,13 @@
     "vitest": "^4.1.11"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.44",
-    "@ai-sdk/google": "^4.0.56",
+    "@ai-sdk/anthropic": "^4.0.45",
+    "@ai-sdk/google": "^4.0.57",
     "@octokit/rest": "^22.0.1",
-    "ai": "^7.0.83",
+    "ai": "^7.0.84",
     "diff": "^9.0.0",
     "dotenv": "^17.4.2",
     "minimatch": "^10.2.6",
-    "zod": "^4.4.3"
+    "zod": "^4.5.1"
   }
 }
