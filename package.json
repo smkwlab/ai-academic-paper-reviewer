@@ -36,9 +36,9 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.49",
-    "@ai-sdk/google": "^4.0.63",
+    "@ai-sdk/google": "^4.0.64",
     "@octokit/rest": "^22.0.1",
-    "ai": "^7.0.92",
+    "ai": "^7.0.93",
     "diff": "^9.0.0",
     "dotenv": "^17.4.2",
     "minimatch": "^10.2.6",
