@@ -2,7 +2,6 @@ import { generateText, generateObject, NoObjectGeneratedError } from "ai";
 import { getModel, supportsTemperature } from "./provider";
 import { Octokit, RestEndpointMethodTypes } from "@octokit/rest";
 import { minimatch } from "minimatch";
-import { components } from "@octokit/openapi-types";
 import { StructuredPatchHunk, StructuredPatch, parsePatch } from "diff";
 import { z } from "zod"
 import * as fs from 'fs/promises';
@@ -56,9 +55,10 @@ export async function withRetry<T>(
     throw lastError;
 }
 
-// OpenAPI型定義から直接Pull Requestの型を取得
-type PullRequestData = components["schemas"]["pull-request"];
-type PullRequestFile = components["schemas"]["diff-entry"];
+// Octokit のレスポンス型から Pull Request の型を取得する
+// (openapi-types を直接参照すると @octokit/rest が解決する型と版がずれうる)
+type PullRequestData = RestEndpointMethodTypes["pulls"]["get"]["response"]["data"];
+type PullRequestFile = RestEndpointMethodTypes["pulls"]["listFiles"]["response"]["data"][number];
 type PullRequestFiles = PullRequestFile[];
 
 type ParsedPullRequestFile = Omit<PullRequestFile, "patch"> & {
