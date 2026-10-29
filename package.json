@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/toshi0806/ai-academic-paper-reviewer#readme",
   "devDependencies": {
-    "@types/node": "^24.19.2",
+    "@types/node": "^26.6.6",
     "dotenv": "^18.0.9",
     "esbuild-register": "^3.6.0",
     "typescript": "^5.9.3",
