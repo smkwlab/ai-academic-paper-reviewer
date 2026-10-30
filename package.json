@@ -36,10 +36,10 @@
     "vitest": "^5.0.5"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.92",
-    "@ai-sdk/google": "^4.0.108",
+    "@ai-sdk/anthropic": "^4.0.93",
+    "@ai-sdk/google": "^4.0.109",
     "@octokit/rest": "^22.0.1",
-    "ai": "^7.0.157",
+    "ai": "^7.0.158",
     "diff": "^9.0.0",
     "minimatch": "^10.2.6",
     "zod": "^4.6.7"
